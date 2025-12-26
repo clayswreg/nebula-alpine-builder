@@ -20,25 +20,23 @@ jobs:
             adduser -D builder -G abuild
             echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
             
-            # 2. Setup the official abuild config directory
+            # 2. Setup keys
             mkdir -p /home/builder/.abuild
-            
-            # 3. Import Private Key and GENERATE Public Key
             echo '${{ secrets.ALPINELINUX_PRIVATE_KEY }}' > /home/builder/.abuild/signing.rsa
             openssl rsa -in /home/builder/.abuild/signing.rsa -pubout -out /home/builder/.abuild/signing.rsa.pub
             
+            # 3. CRITICAL: Trust the key inside the build container so indexing works
+            cp /home/builder/.abuild/signing.rsa.pub /etc/apk/keys/signing.rsa.pub
+            
             # 4. Configure abuild
             echo 'PACKAGER_PRIVKEY=\"/home/builder/.abuild/signing.rsa\"' > /home/builder/.abuild/abuild.conf
-            
-            # 5. Set permissions
             chown -R builder:abuild /home/builder/pkg /home/builder/.abuild
             
-            # 6. Execute build as builder user
-            su builder -c '
-              cd /home/builder/pkg
-              abuild checksum
-              abuild -r -P /home/builder/pkg/output
-            '
+            # 5. Build
+            su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output'
+            
+            # 6. Permissions for GitHub Runner
+            chmod -R 777 /home/builder/pkg/output /home/builder/.abuild
           "
 
       - name: Create Release
