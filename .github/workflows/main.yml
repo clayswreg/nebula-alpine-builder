@@ -1,7 +1,7 @@
 name: Build and Release Nebula APK
 
 on:
-  workflow_dispatch: # This adds the "One Click" button
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
             echo '${{ secrets.ALPINELINUX_PRIVATE_KEY }}' > /home/builder/.abuild/signing.rsa
             openssl rsa -in /home/builder/.abuild/signing.rsa -pubout -out /home/builder/.abuild/signing.rsa.pub
             
-            # 3. CRITICAL: Trust the key inside the build container so indexing works
+            # 3. Trust the key inside the build container
             cp /home/builder/.abuild/signing.rsa.pub /etc/apk/keys/signing.rsa.pub
             
             # 4. Configure abuild
@@ -35,8 +35,11 @@ jobs:
             # 5. Build
             su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output'
             
-            # 6. Permissions for GitHub Runner
-            chmod -R 777 /home/builder/pkg/output /home/builder/.abuild
+            # 6. COPY KEY TO WORKSPACE (This makes it available to GitHub Actions)
+            cp /home/builder/.abuild/signing.rsa.pub /home/builder/pkg/signing.rsa.pub
+            
+            # 7. Permissions for GitHub Runner
+            chmod -R 777 /home/builder/pkg/output /home/builder/pkg/signing.rsa.pub
           "
 
       - name: Create Release
