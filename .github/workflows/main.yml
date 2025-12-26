@@ -16,19 +16,24 @@ jobs:
         run: |
           docker run --rm --platform linux/arm64 -v $(pwd):/home/builder/pkg alpine:latest sh -c "
             # 1. Install tools
-            apk add alpine-sdk sudo
+            apk add alpine-sdk sudo openssl
             adduser -D builder -G abuild
             echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
             
             # 2. Setup the official abuild config directory
             mkdir -p /home/builder/.abuild
+            
+            # 3. Import Private Key and GENERATE Public Key
             echo '${{ secrets.ALPINELINUX_PRIVATE_KEY }}' > /home/builder/.abuild/signing.rsa
+            openssl rsa -in /home/builder/.abuild/signing.rsa -pubout -out /home/builder/.abuild/signing.rsa.pub
+            
+            # 4. Configure abuild
             echo 'PACKAGER_PRIVKEY=\"/home/builder/.abuild/signing.rsa\"' > /home/builder/.abuild/abuild.conf
             
-            # 3. Set permissions
+            # 5. Set permissions
             chown -R builder:abuild /home/builder/pkg /home/builder/.abuild
             
-            # 4. Execute build as builder user
+            # 6. Execute build as builder user
             su builder -c '
               cd /home/builder/pkg
               abuild checksum
