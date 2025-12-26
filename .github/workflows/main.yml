@@ -1,0 +1,32 @@
+name: Build and Release Nebula APK
+
+on:
+  workflow_dispatch: # This adds the "One Click" button
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      
+      - name: Build Package
+        run: |
+          docker run --rm --platform linux/arm64 -v $(pwd):/home/builder/pkg alpine:latest sh -c "
+            apk add alpine-sdk sudo
+            adduser -D builder -G abuild
+            echo 'builder ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+            echo '${{ secrets.ALPINELINUX_PRIVATE_KEY }}' > /home/builder/pkg/signing.rsa
+            chown -R builder /home/builder/pkg
+            su builder -c 'cd /home/builder/pkg && abuild-keygen -n && abuild -P /home/builder/pkg/output -k signing.rsa checksum && abuild -P /home/builder/pkg/output -k signing.rsa -r'
+          "
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: output/pkg/nebula-custom/aarch64/*.apk
+          tag_name: v1.10.0-build-${{ github.run_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
