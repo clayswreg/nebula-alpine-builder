@@ -1,0 +1,12 @@
+#!/sbin/openrc-run
+name="nebula"
+description="Nebula overlay networking tool"
+command="/usr/local/bin/nebula"
+command_args="-config /etc/nebula/config.yml"
+command_background="yes"
+pidfile="/run/${RC_SVCNAME}.pid"
+
+depend() {
+    need net
+    after firewall
+}
