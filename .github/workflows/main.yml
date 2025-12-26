@@ -42,7 +42,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: output/pkg/nebula-custom/aarch64/*.apk
+          files: |
+            output/**/*.apk
+            /home/builder/.abuild/signing.rsa.pub
           tag_name: v1.10.0-build-${{ github.run_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
