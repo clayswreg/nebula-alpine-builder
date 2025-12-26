@@ -1,5 +1,4 @@
 # Maintainer: Automation <automation@localhost.local>
-# Maintainer: Your Name <you@example.com>
 pkgname=nebula-custom
 pkgver=1.10.0
 pkgrel=0
