@@ -1,4 +1,4 @@
-# Maintainer: Automation
+# Maintainer: Automation <automation@localhost.local>
 pkgname=nebula-custom
 pkgver=1.10.0
 pkgrel=0
