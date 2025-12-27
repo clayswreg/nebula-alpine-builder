@@ -81,7 +81,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            all-files/**/*.zip
+            all-files/**/*.apk
             all-files/signing.rsa.pub
           tag_name: v1.10.0-build-${{ github.run_number }}
         env:
