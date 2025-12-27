@@ -49,11 +49,20 @@ jobs:
             chmod -R 777 /home/builder/pkg/output /home/builder/pkg/signing.rsa.pub
           "
 
-      - name: Prepare Artifacts
+      - name: Rename APK
         run: |
           # Rename the .apk to include the architecture in the filename
           # This prevents naming collisions in GitHub Releases
           find . -name "*.apk" -exec bash -c 'mv "$1" "${1%.apk}-${{ matrix.arch }}.apk"' _ {} \;
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nebula-apk-${{ matrix.arch }}
+          path: |
+            output/**/*.apk
+            signing.rsa.pub
+          if-no-files-found: error
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -61,6 +70,33 @@ jobs:
           files: |
             output/**/*.apk
             signing.rsa.pub
+          tag_name: v1.10.0-build-${{ github.run_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-files
+          pattern: |
+            nebula-apk-*
+            signing.rsa.pub
+          merge-multiple: true
+
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            all-files/**/*.apk
+            all-files/signing.rsa.pub
           tag_name: v1.10.0-build-${{ github.run_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
