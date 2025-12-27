@@ -6,6 +6,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            platform: linux/arm64
+          - arch: armv7
+            platform: linux/arm/v7
     permissions:
       contents: write
     steps:
@@ -14,7 +21,7 @@ jobs:
       
       - name: Build Package
         run: |
-          docker run --rm --platform linux/arm64 -v $(pwd):/home/builder/pkg alpine:latest sh -c "
+          docker run --rm --platform ${{ matrix.platform }} -v $(pwd):/home/builder/pkg alpine:latest sh -c "
             # 1. Install tools
             apk add alpine-sdk sudo openssl
             adduser -D builder -G abuild
@@ -33,7 +40,7 @@ jobs:
             chown -R builder:abuild /home/builder/pkg /home/builder/.abuild
             
             # 5. Build
-            su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output'
+            su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output && ls -lhR'
             
             # 6. COPY KEY TO WORKSPACE (This makes it available to GitHub Actions)
             cp /home/builder/.abuild/signing.rsa.pub /home/builder/pkg/signing.rsa.pub
@@ -41,6 +48,12 @@ jobs:
             # 7. Permissions for GitHub Runner
             chmod -R 777 /home/builder/pkg/output /home/builder/pkg/signing.rsa.pub
           "
+
+      - name: Prepare Artifacts
+        run: |
+          # Rename the .apk to include the architecture in the filename
+          # This prevents naming collisions in GitHub Releases
+          find . -name "*.apk" -exec bash -c 'mv "$1" "${1%.apk}-${{ matrix.arch }}.apk"' _ {} \;
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
