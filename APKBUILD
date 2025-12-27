@@ -7,7 +7,7 @@ arch="aarch64 armv7"
 pkgver=1.10.0
 pkgrel=0
 pkgdesc="Nebula for Raspberry Pi"
-arch="aarch64"
+arch="aarch64 armv7"
 url="https://github.com/slackhq/nebula"
 license="MIT"
 
