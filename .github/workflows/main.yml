@@ -36,7 +36,7 @@ jobs:
             chown -R builder:abuild /home/builder/pkg /home/builder/.abuild
             
             # 5. Build
-            su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output'
+            su builder -c 'cd /home/builder/pkg && abuild checksum && abuild -r -P /home/builder/pkg/output && for file in output/*.apk; do mv "$file" "${file%.apk}-${{ matrix.arch }}.apk"; done'
             
             # 6. COPY KEY TO WORKSPACE (This makes it available to GitHub Actions)
             cp /home/builder/.abuild/signing.rsa.pub /home/builder/pkg/signing.rsa.pub
