@@ -1,9 +1,5 @@
 # Maintainer: Automation <automation@localhost.local>
 pkgname=nebula-custom
-
-# Update architectures
-arch="aarch64 armv7"
-
 pkgver=1.10.0
 pkgrel=0
 pkgdesc="Nebula for Raspberry Pi"
