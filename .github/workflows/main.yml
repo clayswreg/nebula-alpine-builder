@@ -53,7 +53,7 @@ jobs:
         run: |
           # Rename the .apk to include the architecture in the filename
           # This prevents naming collisions in GitHub Releases
-          find pkg/ -name "*.apk" -exec bash -c 'mv "$1" "${1%.apk}-${{ matrix.arch }}.apk"' _ {} \;
+          find . -name "*.apk" -exec bash -c 'mv "$1" "${1%.apk}-${{ matrix.arch }}.apk"' _ {} \;
           find output/ -name "*.apk" -exec bash -c 'mv "$1" "${1%.apk}-${{ matrix.arch }}.apk"' _ {} \;
 
       - name: Upload Artifact
