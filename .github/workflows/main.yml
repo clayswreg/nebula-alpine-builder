@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [aarch64, armv7]
     permissions:
       contents: write
     steps:

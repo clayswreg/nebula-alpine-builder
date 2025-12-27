@@ -1,12 +1,22 @@
 # Maintainer: Automation <automation@localhost.local>
 pkgname=nebula-custom
+
+# Update architectures
+arch="aarch64 armv7"
+
 pkgver=1.10.0
 pkgrel=0
-pkgdesc="Nebula for Raspberry Pi 3"
+pkgdesc="Nebula for Raspberry Pi"
 arch="aarch64"
 url="https://github.com/slackhq/nebula"
 license="MIT"
-source="https://github.com/slackhq/nebula/releases/download/v$pkgver/nebula-linux-arm64.tar.gz
+
+case "$CARCH" in
+    aarch64) _arch="arm64" ;;
+    armv7)   _arch="arm-7" ;;
+esac
+
+source="nebula-${pkgver}.tar.gz::https://github.com/slackhq/nebula/releases/download/v${pkgver}/nebula-linux-${_arch}.tar.gz
         nebula.initd"
 options="!strip !check"
 # This tells Alpine to bundle the init script correctly
